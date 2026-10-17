@@ -8,7 +8,7 @@ A scammer pastes their own QR sticker over a hawker's. TrueQR stores a fingerpri
 |---|---|
 | Live web app | https://trueqr-ochre.vercel.app (`/wallet` = DemoPay, `/register` = stall sign-up; `/wallet?venue=1` uses the venue location) |
 | QRRegistry (BSC testnet, verified) | [`0x877D2247B6315f3b344E7F117382045Ee043CbEE`](https://testnet.bscscan.com/address/0x877d2247b6315f3b344e7f117382045ee043cbee#code) |
-| Guardian agent (BNB Agent Studio) | local `bag dev`, see below |
+| Guardian agent (BNB Agent Studio) | ERC-8004 agent #2645; local `bag dev` behind a temporary tunnel, see below |
 
 ## How it works
 
@@ -64,7 +64,23 @@ Built with BNB Agent Studio (scaffolded via /bnbagent-studio). The managed BNB t
 }
 ```
 
-**ERC-8004 identity:** not registered. Studio registers ERC-8004 at deploy time with the agent's public endpoint (`bag deploy verify`). The deploy didn't complete, so `bag erc8004 show` reports `Wallet 0x5f2CEACc18Ca118983047C64352347CD6E048443 has no registered agent.`
+**ERC-8004 identity: agent #2645** on the BSC testnet identity registry [`0x8004A818BFB912233c491871b3d84c89A494BD9e`](https://testnet.bscscan.com/address/0x8004A818BFB912233c491871b3d84c89A494BD9e), owned by the Guardian wallet. Registration tx: [`0xf3a0f8f7…3238`](https://testnet.bscscan.com/tx/0xf3a0f8f78809641626ebb320293f3a5f1ca81fae9daefded432b71d3701a3238).
+
+```
+$ bag erc8004 show
+agent_id:  2645
+address:   0x5f2CEACc18Ca118983047C64352347CD6E048443
+agent_uri: data:application/json;base64,…   # decodes to:
+  { "name": "TrueQR Guardian",
+    "description": "TrueQR Guardian — checks whether a DuitNow QR belongs to the stall at a location. Returns green / amber / red with a reason.",
+    "services": [{ "name": "A2A", "version": "0.3.0",
+                   "endpoint": "https://morris-consoles-calculations-middle.trycloudflare.com/.well-known/agent-card.json" }],
+    "registrations": [{ "agentId": 2645, "agentRegistry": "eip155:97:0x8004A818BFB912233c491871b3d84c89A494BD9e" }] }
+```
+
+**The registered endpoint is a temporary tunnel to the locally running agent.** A Cloudflare quick tunnel (`cloudflared tunnel --url http://localhost:9100`) exposes the `bag dev` Guardian at `https://morris-consoles-calculations-middle.trycloudflare.com`. It works only while that laptop runs both `bag dev` and the tunnel, and a restarted quick tunnel gets a new URL (then run `bag erc8004 update-endpoint`). Because the managed deploy didn't complete, Studio's gasless platform registration (`bag deploy verify`) wasn't available. The identity was registered with `bag erc8004 register`, with `[deploy].destination` temporarily set to `self` so the CLI allowed a wallet-paid registration (the MegaFuel sponsor accepted but didn't broadcast, so the CLI fell back to self-paid gas). The destination was set back to `platform` afterwards. The A2A card served through the tunnel still lists `url: http://127.0.0.1:9100/`, because `bag dev` builds it locally.
+
+Checked through the tunnel with `scripts/wallet-agent.ts` (`GUARDIAN_URL=https://morris-consoles-calculations-middle.trycloudflare.com`): the stall's own QR → `green match`; a different QR → `amber qr_mismatch`.
 
 **Managed trial deploy (what happened):** `bag platform login` succeeded (trial "available", 0 agents). `bag deploy --provider bnb --backend aws --yes [--accept-risk]` run inside `guardian/` printed `deployment plan: create · provider=bnb · target=bnb/trial` and then hung with no network activity. Run from the home folder it got further, to the trial terms, then failed because there was no `studio.toml` there. No agent was created and the 48 h trial clock never started.
 

@@ -105,3 +105,8 @@ work_timeout_seconds = 60
 # Optional Bazaar metadata can be added later as scalar JSON fields under
 # [payments.b402_seller.bazaar]: info_json, schema_json, description,
 # and route_template.
+
+[identity]
+endpoint = "https://morris-consoles-calculations-middle.trycloudflare.com"
+registered_at = "2026-10-17T07:16:49.269Z"
+agent_id = 2645
