@@ -1,0 +1,9 @@
+.env*
+.studio/
+sentinel/data/
+node_modules
+out
+cache
+broadcast
+.next
+*.tsbuildinfo
