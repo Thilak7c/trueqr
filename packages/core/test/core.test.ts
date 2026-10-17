@@ -111,18 +111,30 @@ describe("verify — §6 table", () => {
     expect([v.status, v.reason]).toEqual(["amber", "dynamic_qr"]);
   });
 
-  it("row 3: registered, > 300 m away → amber registered_elsewhere", async () => {
-    const v = await verify({ qrPayload: STALL_QR, ...at(0.004) }, fakeReader([S1])); // ~445 m
-    expect([v.status, v.reason]).toEqual(["amber", "registered_elsewhere"]);
+  it("row 3: registered, > 1,000 m away → amber registered_elsewhere + distance note", async () => {
+    const v = await verify({ qrPayload: STALL_QR, ...at(0.01) }, fakeReader([S1])); // ~1,112 m
+    expect([v.status, v.reason, v.notes]).toEqual(["amber", "registered_elsewhere", ["distance_m:1112"]]);
     expect(v.stall?.name).toBe("Mak Cik Nasi Lemak");
     expect(v.message).toBe("This QR belongs to Mak Cik Nasi Lemak at another location.");
   });
 
-  it("row 4: registered, within 300 m → green match", async () => {
+  it("row 4: registered, ~890 m away (indoor GPS drift) → still green", async () => {
+    const v = await verify({ qrPayload: STALL_QR, ...at(0.008) }, fakeReader([S1]));
+    expect([v.status, v.reason, v.notes]).toEqual(["green", "match", ["distance_m:890"]]);
+  });
+
+  it("row 4: registered, nearby → green match + distance note + stall coords", async () => {
     const v = await verify({ qrPayload: STALL_QR, ...at(0.002) }, fakeReader([S1])); // ~222 m
     expect([v.status, v.reason]).toEqual(["green", "match"]);
-    expect(v.notes).toEqual([]);
-    expect(v.stall).toEqual({ id: 1, name: "Mak Cik Nasi Lemak", photoURI: "https://x/1.jpg", registeredAt: 1_700_000_000 });
+    expect(v.notes).toEqual(["distance_m:222"]);
+    expect(v.stall).toEqual({
+      id: 1,
+      name: "Mak Cik Nasi Lemak",
+      photoURI: "https://x/1.jpg",
+      registeredAt: 1_700_000_000,
+      lat: 3.139,
+      lng: 101.6869,
+    });
     expect(v.payeeName).toBe("MAK CIK NASI LEMAK");
     expect(v.message).toBe("This is Mak Cik Nasi Lemak.");
   });
@@ -132,10 +144,10 @@ describe("verify — §6 table", () => {
     expect([v.status, v.reason, v.notes]).toEqual(["green", "match", ["location_not_checked"]]);
   });
 
-  it("row 5: unregistered, active stalls ≤ 100 m → amber qr_mismatch, nearest first", async () => {
-    const far = stall(2, "0x02", "Far Stall", 0.0008); // ~89 m
+  it("row 5: unregistered, active stalls ≤ 300 m → amber qr_mismatch, nearest first", async () => {
+    const far = stall(2, "0x02", "Far Stall", 0.0025); // ~278 m
     const near = stall(3, "0x03", "Near Stall", 0.0002); // ~22 m
-    const out = stall(4, "0x04", "Outside", 0.002); // ~222 m
+    const out = stall(4, "0x04", "Outside", 0.004); // ~445 m
     const dead = stall(5, "0x05", "Inactive", 0, false);
     const v = await verify({ qrPayload: SCAM_QR, ...VENUE }, fakeReader([far, near, out, dead]));
     expect([v.status, v.reason]).toEqual(["amber", "qr_mismatch"]);
@@ -151,15 +163,15 @@ describe("verify — §6 table", () => {
     expect(v.message).toBe("QR ini bukan milik Mak Cik Nasi Lemak. Ia bayar kepada ALI BIN ABU. Jangan bayar.");
   });
 
-  it("row 6: unregistered, no stall ≤ 100 m → amber unregistered", async () => {
-    const v = await verify({ qrPayload: SCAM_QR, ...at(0.002) }, fakeReader([S1]));
+  it("row 6: unregistered, no stall ≤ 300 m → amber unregistered", async () => {
+    const v = await verify({ qrPayload: SCAM_QR, ...at(0.004) }, fakeReader([S1])); // ~445 m
     expect([v.status, v.reason, v.nearby]).toEqual(["amber", "unregistered", []]);
     expect(v.message).toBe("Not registered with TrueQR. It pays ALI BIN ABU.");
   });
 
   it("row 6: unregistered, no location → unregistered (never mismatch)", async () => {
     const v = await verify({ qrPayload: SCAM_QR }, fakeReader([S1]));
-    expect(v.reason).toBe("unregistered");
+    expect([v.reason, v.notes]).toEqual(["unregistered", ["location_not_checked"]]);
   });
 
   it("row 6: non-EMV text → unregistered with unknown payee", async () => {

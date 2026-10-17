@@ -3,31 +3,52 @@
 import { useEffect, useRef, useState } from "react";
 import type { Verdict } from "@trueqr/core";
 
-type Loc = { lat: number; lng: number } | null;
+type Loc = { lat: number; lng: number; acc: number } | null;
 type Screen =
   | { k: "home" }
   | { k: "scan" }
   | { k: "checking" }
-  | { k: "result"; v: Verdict }
+  | { k: "result"; v: Verdict; here: Loc }
   | { k: "paid"; amount: number; to: string };
 
 const btn = "flex h-14 w-full items-center justify-center rounded-2xl text-lg font-semibold disabled:opacity-40";
 const rm = (n: number) => `RM ${n.toFixed(2)}`;
+const MAX_ACCURACY_M = 500; // worse than this (e.g. indoor Wi-Fi fix ±2000 m) is treated as no location
+const VENUE = { lat: Number(process.env.NEXT_PUBLIC_VENUE_LAT), lng: Number(process.env.NEXT_PUBLIC_VENUE_LNG) };
+const hasVenue = Number.isFinite(VENUE.lat) && Number.isFinite(VENUE.lng);
+
+function VenueBadge() {
+  return (
+    <span className="rounded-full bg-warn/15 px-3 py-1 text-sm font-semibold text-warn">📍 Demo: venue location</span>
+  );
+}
 
 export default function Wallet({ token }: { token: string }) {
   const [screen, setScreen] = useState<Screen>({ k: "home" });
   const [balance, setBalance] = useState(120);
   const [error, setError] = useState<{ msg: string; retry: () => void } | null>(null);
   const loc = useRef<Promise<Loc> | null>(null);
+  const [debug, setDebug] = useState(false);
+  const [venue, setVenue] = useState(false);
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    setDebug(q.get("debug") === "1");
+    setVenue(q.get("venue") === "1" && hasVenue);
+  }, []);
 
-  // Ask for location once; resolve null on deny/timeout so scanning never blocks on it.
+  // Fresh fix per scan (the browser only prompts for permission once). Resolves null on deny/timeout so scanning never blocks.
+  // ?venue=1 skips GPS and uses the venue coordinates (shown with a badge).
   const askLocation = () => {
-    loc.current ??= new Promise<Loc>((resolve) => {
+    if (venue) {
+      loc.current = Promise.resolve({ ...VENUE, acc: 0 });
+      return;
+    }
+    loc.current = new Promise<Loc>((resolve) => {
       if (!navigator.geolocation) return resolve(null);
       navigator.geolocation.getCurrentPosition(
-        (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+        (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }),
         () => resolve(null),
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 },
       );
     });
   };
@@ -37,14 +58,15 @@ export default function Wallet({ token }: { token: string }) {
     setScreen({ k: "checking" });
     try {
       const here = await (loc.current ?? Promise.resolve(null));
+      const usable = here && here.acc <= MAX_ACCURACY_M ? here : null;
       const res = await fetch("/api/verify", {
         method: "POST",
         headers: { "content-type": "application/json", "x-demo-token": token },
-        body: JSON.stringify({ qrPayload, ...here }),
+        body: JSON.stringify({ qrPayload, lat: usable?.lat, lng: usable?.lng }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-      setScreen({ k: "result", v: data });
+      setScreen({ k: "result", v: data, here });
     } catch (e) {
       setScreen({ k: "home" });
       setError({ msg: `Couldn't check this QR: ${(e as Error).message}`, retry: () => check(qrPayload) });
@@ -72,7 +94,7 @@ export default function Wallet({ token }: { token: string }) {
           </button>
         </div>
       )}
-      {screen.k === "home" && <Home balance={balance} onScan={startScan} />}
+      {screen.k === "home" && <Home balance={balance} venue={venue} onScan={startScan} />}
       {screen.k === "scan" && (
         <Scanner
           onResult={check}
@@ -87,7 +109,15 @@ export default function Wallet({ token }: { token: string }) {
         </div>
       )}
       {screen.k === "result" && (
-        <Result v={screen.v} balance={balance} onPay={pay} onAgain={startScan} />
+        <Result
+          v={screen.v}
+          here={screen.here}
+          debug={debug}
+          venue={venue}
+          balance={balance}
+          onPay={pay}
+          onAgain={startScan}
+        />
       )}
       {screen.k === "paid" && (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
@@ -107,7 +137,7 @@ export default function Wallet({ token }: { token: string }) {
   );
 }
 
-function Home({ balance, onScan }: { balance: number; onScan: () => void }) {
+function Home({ balance, venue, onScan }: { balance: number; venue: boolean; onScan: () => void }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-between p-6">
       <div className="w-full">
@@ -126,7 +156,10 @@ function Home({ balance, onScan }: { balance: number; onScan: () => void }) {
         </span>
         Scan
       </button>
-      <p className="rounded-full bg-ok/10 px-4 py-2 text-base font-semibold text-ok">🛡️ Protected by TrueQR</p>
+      <div className="flex flex-col items-center gap-2">
+        {venue && <VenueBadge />}
+        <p className="rounded-full bg-ok/10 px-4 py-2 text-base font-semibold text-ok">🛡️ Protected by TrueQR</p>
+      </div>
     </div>
   );
 }
@@ -240,13 +273,34 @@ function Avatar({ name, photoURI }: { name: string; photoURI?: string }) {
   );
 }
 
+function DebugLine({ v, here }: { v: Verdict; here: Loc }) {
+  const f = (n: number) => n.toFixed(6);
+  const dist = v.notes.find((n) => n.startsWith("distance_m:"))?.split(":")[1] ?? v.nearby[0]?.distanceM ?? "–";
+  return (
+    <p className="break-all font-mono text-xs text-muted">
+      debug · you{" "}
+      {here
+        ? `${f(here.lat)},${f(here.lng)} ±${Math.round(here.acc)}m${here.acc > MAX_ACCURACY_M ? " (ignored)" : ""}`
+        : "no location"}{" "}
+      · stall{" "}
+      {v.stall ? `#${v.stall.id} ${f(v.stall.lat)},${f(v.stall.lng)}` : "–"} · d={dist}m · {v.reason}
+    </p>
+  );
+}
+
 function Result({
   v,
+  here,
+  debug,
+  venue,
   balance,
   onPay,
   onAgain,
 }: {
   v: Verdict;
+  here: Loc;
+  debug: boolean;
+  venue: boolean;
   balance: number;
   onPay: (amount: number, to: string) => void;
   onAgain: () => void;
@@ -283,6 +337,12 @@ function Result({
           {look.icon}
         </span>
         <h1 className="text-center text-[32px] font-bold leading-tight">{look.title}</h1>
+        {venue && (
+          <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold">📍 Demo: venue location</span>
+        )}
+        {v.notes.includes("location_not_checked") && (
+          <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold">Location not checked</span>
+        )}
       </div>
       <div className="-mt-6 flex flex-1 flex-col gap-4 rounded-t-3xl bg-card p-6">
         {v.status === "green" && v.stall && (
@@ -342,6 +402,7 @@ function Result({
         <button className={`${btn} mt-auto bg-ink/5`} onClick={onAgain}>
           Scan again
         </button>
+        {debug && <DebugLine v={v} here={here} />}
       </div>
     </div>
   );

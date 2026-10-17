@@ -33,18 +33,19 @@ export type Verdict = {
   message: string;
   payeeName: string | null;
   qrHash: string;
-  stall: { id: number; name: string; photoURI: string; registeredAt: number } | null;
+  stall: { id: number; name: string; photoURI: string; registeredAt: number; lat: number; lng: number } | null;
   nearby: { id: number; name: string; photoURI: string; distanceM: number }[];
   reportTx: string | null;
 };
 
 export type VerifyInput = { qrPayload: string; lat?: number; lng?: number };
 
-const MISMATCH_RADIUS_M = 100;
-const ELSEWHERE_RADIUS_M = 300;
+// Wide on purpose: indoor phone GPS is often off by hundreds of metres.
+const MISMATCH_RADIUS_M = 300;
+const ELSEWHERE_RADIUS_M = 1_000;
 
 const pos = (s: Stall): LatLng => ({ lat: s.latE6 / 1e6, lng: s.lngE6 / 1e6 });
-const summary = (s: Stall) => ({ id: s.id, name: s.name, photoURI: s.photoURI, registeredAt: s.registeredAt });
+const summary = (s: Stall) => ({ id: s.id, name: s.name, photoURI: s.photoURI, registeredAt: s.registeredAt, ...pos(s) });
 
 function location(i: VerifyInput): LatLng | null {
   const { lat, lng } = i;
@@ -81,8 +82,11 @@ export async function verify(input: VerifyInput, reader: Reader, lang = "en"): P
   const id = await reader.stallByQr(hash);
   if (id) {
     const s = await reader.getStall(id);
-    if (here && haversineM(here, pos(s)) > ELSEWHERE_RADIUS_M) return out("amber", "registered_elsewhere", { stall: summary(s) });
-    return out("green", "match", { stall: summary(s), notes: here ? [] : ["location_not_checked"] });
+    if (!here) return out("green", "match", { stall: summary(s), notes: ["location_not_checked"] });
+    const d = haversineM(here, pos(s));
+    const notes = [`distance_m:${Math.round(d)}`];
+    if (d > ELSEWHERE_RADIUS_M) return out("amber", "registered_elsewhere", { stall: summary(s), notes });
+    return out("green", "match", { stall: summary(s), notes });
   }
 
   if (here) {
@@ -98,7 +102,7 @@ export async function verify(input: VerifyInput, reader: Reader, lang = "en"): P
       });
     }
   }
-  return out("amber", "unregistered");
+  return out("amber", "unregistered", here ? {} : { notes: ["location_not_checked"] });
 }
 
 /** One provider per RPC URL (BSC testnet, 8 s timeout so a dead RPC fails over quickly). */

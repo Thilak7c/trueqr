@@ -1,0 +1,13 @@
+# Never upload secrets or local state (Vercel CLI does not read .gitignore)
+.env*
+.studio
+sentinel/data
+cache
+broadcast
+out
+node_modules
+.next
+# Not needed by the web build
+contracts
+guardian
+.claude
