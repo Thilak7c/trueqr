@@ -1,5 +1,8 @@
 {
   "name": "trueqr",
   "private": true,
-  "packageManager": "pnpm@10.18.3"
+  "packageManager": "pnpm@10.18.3",
+  "devDependencies": {
+    "tsx": "4.20.6"
+  }
 }

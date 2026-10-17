@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { keccak256, toUtf8Bytes } from "ethers";
-import { haversineM, message, parseEmv, qrHash, verify, type Reader, type Stall } from "../src/index";
+import { haversineM, message, parseEmv, qrHash, verify, type Reader, type Stall } from "../src/index.js";
 
 // Synthetic DuitNow-shaped QRs (fake payee, same structure as real TnG / GX samples).
 const tlv = (tag: string, v: string) => tag + String(v.length).padStart(2, "0") + v;

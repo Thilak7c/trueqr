@@ -1,0 +1,492 @@
+[
+    {
+        "type":  "constructor",
+        "inputs":  [
+                       {
+                           "name":  "agent_",
+                           "type":  "address",
+                           "internalType":  "address"
+                       },
+                       {
+                           "name":  "registrars_",
+                           "type":  "address[]",
+                           "internalType":  "address[]"
+                       }
+                   ],
+        "stateMutability":  "nonpayable"
+    },
+    {
+        "type":  "function",
+        "name":  "agent",
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "",
+                            "type":  "address",
+                            "internalType":  "address"
+                        }
+                    ],
+        "stateMutability":  "view"
+    },
+    {
+        "type":  "function",
+        "name":  "blacklisted",
+        "inputs":  [
+                       {
+                           "name":  "",
+                           "type":  "bytes32",
+                           "internalType":  "bytes32"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "",
+                            "type":  "bool",
+                            "internalType":  "bool"
+                        }
+                    ],
+        "stateMutability":  "view"
+    },
+    {
+        "type":  "function",
+        "name":  "confirmBlacklist",
+        "inputs":  [
+                       {
+                           "name":  "qrHash",
+                           "type":  "bytes32",
+                           "internalType":  "bytes32"
+                       },
+                       {
+                           "name":  "reason",
+                           "type":  "string",
+                           "internalType":  "string"
+                       }
+                   ],
+        "outputs":  [
+
+                    ],
+        "stateMutability":  "nonpayable"
+    },
+    {
+        "type":  "function",
+        "name":  "deactivate",
+        "inputs":  [
+                       {
+                           "name":  "id",
+                           "type":  "uint256",
+                           "internalType":  "uint256"
+                       }
+                   ],
+        "outputs":  [
+
+                    ],
+        "stateMutability":  "nonpayable"
+    },
+    {
+        "type":  "function",
+        "name":  "deployBlock",
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "",
+                            "type":  "uint256",
+                            "internalType":  "uint256"
+                        }
+                    ],
+        "stateMutability":  "view"
+    },
+    {
+        "type":  "function",
+        "name":  "getStall",
+        "inputs":  [
+                       {
+                           "name":  "id",
+                           "type":  "uint256",
+                           "internalType":  "uint256"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "",
+                            "type":  "tuple",
+                            "internalType":  "struct QRRegistry.Stall",
+                            "components":  [
+                                               {
+                                                   "name":  "registrar",
+                                                   "type":  "address",
+                                                   "internalType":  "address"
+                                               },
+                                               {
+                                                   "name":  "qrHash",
+                                                   "type":  "bytes32",
+                                                   "internalType":  "bytes32"
+                                               },
+                                               {
+                                                   "name":  "name",
+                                                   "type":  "string",
+                                                   "internalType":  "string"
+                                               },
+                                               {
+                                                   "name":  "latE6",
+                                                   "type":  "int32",
+                                                   "internalType":  "int32"
+                                               },
+                                               {
+                                                   "name":  "lngE6",
+                                                   "type":  "int32",
+                                                   "internalType":  "int32"
+                                               },
+                                               {
+                                                   "name":  "photoURI",
+                                                   "type":  "string",
+                                                   "internalType":  "string"
+                                               },
+                                               {
+                                                   "name":  "lang",
+                                                   "type":  "string",
+                                                   "internalType":  "string"
+                                               },
+                                               {
+                                                   "name":  "registeredAt",
+                                                   "type":  "uint64",
+                                                   "internalType":  "uint64"
+                                               },
+                                               {
+                                                   "name":  "active",
+                                                   "type":  "bool",
+                                                   "internalType":  "bool"
+                                               }
+                                           ]
+                        }
+                    ],
+        "stateMutability":  "view"
+    },
+    {
+        "type":  "function",
+        "name":  "nextStallId",
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "",
+                            "type":  "uint256",
+                            "internalType":  "uint256"
+                        }
+                    ],
+        "stateMutability":  "view"
+    },
+    {
+        "type":  "function",
+        "name":  "registerStall",
+        "inputs":  [
+                       {
+                           "name":  "qrHash",
+                           "type":  "bytes32",
+                           "internalType":  "bytes32"
+                       },
+                       {
+                           "name":  "name",
+                           "type":  "string",
+                           "internalType":  "string"
+                       },
+                       {
+                           "name":  "latE6",
+                           "type":  "int32",
+                           "internalType":  "int32"
+                       },
+                       {
+                           "name":  "lngE6",
+                           "type":  "int32",
+                           "internalType":  "int32"
+                       },
+                       {
+                           "name":  "photoURI",
+                           "type":  "string",
+                           "internalType":  "string"
+                       },
+                       {
+                           "name":  "lang",
+                           "type":  "string",
+                           "internalType":  "string"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "id",
+                            "type":  "uint256",
+                            "internalType":  "uint256"
+                        }
+                    ],
+        "stateMutability":  "nonpayable"
+    },
+    {
+        "type":  "function",
+        "name":  "registrars",
+        "inputs":  [
+                       {
+                           "name":  "",
+                           "type":  "address",
+                           "internalType":  "address"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "",
+                            "type":  "bool",
+                            "internalType":  "bool"
+                        }
+                    ],
+        "stateMutability":  "view"
+    },
+    {
+        "type":  "function",
+        "name":  "removeBlacklist",
+        "inputs":  [
+                       {
+                           "name":  "qrHash",
+                           "type":  "bytes32",
+                           "internalType":  "bytes32"
+                       },
+                       {
+                           "name":  "reason",
+                           "type":  "string",
+                           "internalType":  "string"
+                       }
+                   ],
+        "outputs":  [
+
+                    ],
+        "stateMutability":  "nonpayable"
+    },
+    {
+        "type":  "function",
+        "name":  "reportMismatch",
+        "inputs":  [
+                       {
+                           "name":  "stallId",
+                           "type":  "uint256",
+                           "internalType":  "uint256"
+                       },
+                       {
+                           "name":  "scannedQrHash",
+                           "type":  "bytes32",
+                           "internalType":  "bytes32"
+                       }
+                   ],
+        "outputs":  [
+
+                    ],
+        "stateMutability":  "nonpayable"
+    },
+    {
+        "type":  "function",
+        "name":  "stallByQr",
+        "inputs":  [
+                       {
+                           "name":  "",
+                           "type":  "bytes32",
+                           "internalType":  "bytes32"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "",
+                            "type":  "uint256",
+                            "internalType":  "uint256"
+                        }
+                    ],
+        "stateMutability":  "view"
+    },
+    {
+        "type":  "function",
+        "name":  "updateQr",
+        "inputs":  [
+                       {
+                           "name":  "id",
+                           "type":  "uint256",
+                           "internalType":  "uint256"
+                       },
+                       {
+                           "name":  "newHash",
+                           "type":  "bytes32",
+                           "internalType":  "bytes32"
+                       }
+                   ],
+        "outputs":  [
+
+                    ],
+        "stateMutability":  "nonpayable"
+    },
+    {
+        "type":  "event",
+        "name":  "BlacklistRemoved",
+        "inputs":  [
+                       {
+                           "name":  "qrHash",
+                           "type":  "bytes32",
+                           "indexed":  true,
+                           "internalType":  "bytes32"
+                       },
+                       {
+                           "name":  "reason",
+                           "type":  "string",
+                           "indexed":  false,
+                           "internalType":  "string"
+                       }
+                   ],
+        "anonymous":  false
+    },
+    {
+        "type":  "event",
+        "name":  "Blacklisted",
+        "inputs":  [
+                       {
+                           "name":  "qrHash",
+                           "type":  "bytes32",
+                           "indexed":  true,
+                           "internalType":  "bytes32"
+                       },
+                       {
+                           "name":  "reason",
+                           "type":  "string",
+                           "indexed":  false,
+                           "internalType":  "string"
+                       }
+                   ],
+        "anonymous":  false
+    },
+    {
+        "type":  "event",
+        "name":  "MismatchReported",
+        "inputs":  [
+                       {
+                           "name":  "stallId",
+                           "type":  "uint256",
+                           "indexed":  true,
+                           "internalType":  "uint256"
+                       },
+                       {
+                           "name":  "scannedQrHash",
+                           "type":  "bytes32",
+                           "indexed":  true,
+                           "internalType":  "bytes32"
+                       },
+                       {
+                           "name":  "reporter",
+                           "type":  "address",
+                           "indexed":  false,
+                           "internalType":  "address"
+                       }
+                   ],
+        "anonymous":  false
+    },
+    {
+        "type":  "event",
+        "name":  "QrUpdated",
+        "inputs":  [
+                       {
+                           "name":  "id",
+                           "type":  "uint256",
+                           "indexed":  true,
+                           "internalType":  "uint256"
+                       },
+                       {
+                           "name":  "oldHash",
+                           "type":  "bytes32",
+                           "indexed":  false,
+                           "internalType":  "bytes32"
+                       },
+                       {
+                           "name":  "newHash",
+                           "type":  "bytes32",
+                           "indexed":  false,
+                           "internalType":  "bytes32"
+                       }
+                   ],
+        "anonymous":  false
+    },
+    {
+        "type":  "event",
+        "name":  "StallRegistered",
+        "inputs":  [
+                       {
+                           "name":  "id",
+                           "type":  "uint256",
+                           "indexed":  true,
+                           "internalType":  "uint256"
+                       },
+                       {
+                           "name":  "qrHash",
+                           "type":  "bytes32",
+                           "indexed":  true,
+                           "internalType":  "bytes32"
+                       },
+                       {
+                           "name":  "latE6",
+                           "type":  "int32",
+                           "indexed":  false,
+                           "internalType":  "int32"
+                       },
+                       {
+                           "name":  "lngE6",
+                           "type":  "int32",
+                           "indexed":  false,
+                           "internalType":  "int32"
+                       },
+                       {
+                           "name":  "name",
+                           "type":  "string",
+                           "indexed":  false,
+                           "internalType":  "string"
+                       }
+                   ],
+        "anonymous":  false
+    },
+    {
+        "type":  "error",
+        "name":  "NoSuchStall",
+        "inputs":  [
+
+                   ]
+    },
+    {
+        "type":  "error",
+        "name":  "NotAgent",
+        "inputs":  [
+
+                   ]
+    },
+    {
+        "type":  "error",
+        "name":  "NotRegistrar",
+        "inputs":  [
+
+                   ]
+    },
+    {
+        "type":  "error",
+        "name":  "NotStallRegistrar",
+        "inputs":  [
+
+                   ]
+    },
+    {
+        "type":  "error",
+        "name":  "QrBlacklisted",
+        "inputs":  [
+
+                   ]
+    },
+    {
+        "type":  "error",
+        "name":  "QrTaken",
+        "inputs":  [
+
+                   ]
+    }
+]

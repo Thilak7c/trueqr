@@ -124,9 +124,9 @@ Repeated `TT LL VALUE` (2-digit tag, 2-digit length). 59 = payee name, 60 = city
 | 3 | registered, location given, > 1,000 m from its stall | amber | `registered_elsewhere` (+ note `distance_m:<n>`) | "Pay anyway" |
 | 4 | registered | green | `match` (+ note `distance_m:<n>`, or `location_not_checked` if no location) | Pay |
 | 5 | not registered, location given, ≥ 1 active stall ≤ 300 m | amber | `qr_mismatch` (+ nearby, nearest first) | disabled |
+| 6 | otherwise | amber | `unregistered` (+ note `location_not_checked` if no location) | "Pay anyway" |
 
 Radii are wide on purpose: indoor phone GPS is often off by hundreds of metres. DemoPay drops any fix with accuracy worse than 500 m (sends no lat/lng → `location_not_checked`). `/wallet?debug=1` shows your lat/lng ± accuracy, the stall's lat/lng and the distance. `/wallet?venue=1` uses `NEXT_PUBLIC_VENUE_LAT/LNG` instead of GPS and shows a "Demo: venue location" badge.
-| 6 | otherwise | amber | `unregistered` (+ note `location_not_checked` if no location) | "Pay anyway" |
 
 `listStalls()` (chain reader) = `StallRegistered` logs from `deployBlock` + `getStall` for `active`, cached 15 s. Query logs in chunks ≤ 5,000 blocks. **Unit test every row.**
 

@@ -1,10 +1,10 @@
 import { Contract, FetchRequest, JsonRpcProvider, type EventLog } from "ethers";
-import abi from "./abi.json";
-import { CHAIN_ID, DEPLOY_BLOCK, REGISTRY_ADDRESS } from "./address";
-import { parseEmv } from "./emv";
-import { qrHash } from "./fingerprint";
-import { haversineM, type LatLng } from "./geo";
-import { message, type Reason } from "./reasons";
+import abi from "./abi.json" with { type: "json" };
+import { CHAIN_ID, DEPLOY_BLOCK, REGISTRY_ADDRESS } from "./address.js";
+import { parseEmv } from "./emv.js";
+import { qrHash } from "./fingerprint.js";
+import { haversineM, type LatLng } from "./geo.js";
+import { message, type Reason } from "./reasons.js";
 
 export type Stall = {
   id: number;

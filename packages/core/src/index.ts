@@ -1,7 +1,7 @@
-export { default as abi } from "./abi.json";
-export * from "./address";
-export * from "./emv";
-export * from "./fingerprint";
-export * from "./geo";
-export * from "./reasons";
-export * from "./verify";
+export { default as abi } from "./abi.json" with { type: "json" };
+export * from "./address.js";
+export * from "./emv.js";
+export * from "./fingerprint.js";
+export * from "./geo.js";
+export * from "./reasons.js";
+export * from "./verify.js";
