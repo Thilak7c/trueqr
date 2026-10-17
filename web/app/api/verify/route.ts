@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 // shortcut: per-instance memory, so the limit resets on cold start / differs across Vercel instances; fine for the demo.
 const lastReport = new Map<string, number>();
-const REPORT_EVERY_MS = 10 * 60_000;
+const REPORT_EVERY_MS = 60_000; // short enough that 3 scans can trip Sentinel's 3-reports-in-1h backup rule in a demo
 
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
 
