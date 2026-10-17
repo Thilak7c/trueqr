@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       if (now - (lastReport.get(key) ?? 0) > REPORT_EVERY_MS) {
         lastReport.set(key, now);
         try {
-          v.reportTx = await relayerSend((r) => r.reportMismatch(v.stall!.id, v.qrHash));
+          v.reportTx = (await relayerSend((r) => r.reportMismatch(v.stall!.id, v.qrHash))).hash;
         } catch (e) {
           lastReport.delete(key);
           console.error("reportMismatch failed", { stallId: v.stall.id, qrHash: v.qrHash, error: String(e) });

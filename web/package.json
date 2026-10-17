@@ -10,15 +10,18 @@
   },
   "dependencies": {
     "@trueqr/core": "workspace:*",
+    "@vercel/blob": "2.7.0",
     "ethers": "6.15.0",
     "html5-qrcode": "2.3.8",
     "next": "15.5.28",
+    "qrcode": "1.5.4",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.19.0",
+    "@types/qrcode": "1.5.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "tailwindcss": "4.3.3",
